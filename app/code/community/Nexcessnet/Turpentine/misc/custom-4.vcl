@@ -31,15 +31,15 @@ C{
 import std;
 import directors;
 
-## Custom VCL Logic - Top
-
-{{custom_vcl_include_top}}
-
 ## Backends
 
 {{default_backend}}
 
 {{admin_backend}}
+
+## Custom VCL Logic - Top
+
+{{custom_vcl_include_top}}
 
 ## ACLs
 
