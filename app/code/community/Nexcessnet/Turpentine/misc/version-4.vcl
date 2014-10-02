@@ -29,15 +29,15 @@ C{
 
 import std;
 
-## Custom VCL Logic
-
-{{custom_vcl_include}}
-
 ## Backends
 
 {{default_backend}}
 
 {{admin_backend}}
+
+## Custom VCL Logic
+
+{{custom_vcl_include}}
 
 ## ACLs
 
