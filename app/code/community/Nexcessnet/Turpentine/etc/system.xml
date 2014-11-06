@@ -198,47 +198,66 @@
                     <show_in_website>0</show_in_website>
                     <show_in_store>0</show_in_store>
                     <fields>
-                        <backend_host translate="label" module="turpentine">
-                            <label>Backend Host</label>
+                        <admin_backend_host translate="label" module="turpentine">
+                            <label>Admin Backend Host</label>
                             <frontend_type>text</frontend_type>
                             <sort_order>10</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>0</show_in_website>
                             <show_in_store>0</show_in_store>
-                        </backend_host>
-                        <backend_port translate="label" module="turpentine">
-                            <label>Backend Port</label>
+                        </admin_backend_host>
+                        <admin_backend_port translate="label" module="turpentine">
+                            <label>Admin Backend Port</label>
                             <frontend_type>text</frontend_type>
                             <validate>validate-greater-than-zero</validate>
                             <sort_order>20</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>0</show_in_website>
                             <show_in_store>0</show_in_store>
-                        </backend_port>
-                        <frontend_timeout translate="label" module="turpentine">
-                            <label>Frontend Timeout</label>
-                            <frontend_type>text</frontend_type>
-                            <validate>validate-greater-than-zero</validate>
-                            <sort_order>30</sort_order>
-                            <comment>Timeout in seconds for Varnish to get a response from Magento's frontend</comment>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>0</show_in_website>
-                            <show_in_store>0</show_in_store>
-                        </frontend_timeout>
+                        </admin_backend_port>
                         <admin_timeout translate="label" module="turpentine">
                             <label>Admin Timeout</label>
                             <frontend_type>text</frontend_type>
                             <validate>validate-greater-than-zero</validate>
-                            <sort_order>40</sort_order>
+                            <sort_order>30</sort_order>
                             <comment>Timeout in seconds for Varnish to get a response from Magento's backend</comment>
                             <show_in_default>1</show_in_default>
                             <show_in_website>0</show_in_website>
                             <show_in_store>0</show_in_store>
                         </admin_timeout>
+                        <frontend_hosts translate="label" module="turpentine">
+                            <label>Frontend Server List</label>
+                            <frontend_type>textarea</frontend_type>
+                            <comment>Should be a list of HOST:PORT pairs of the Magento frontend webservers, one per line (an empty list defaults to just the Admin Backend)</comment>
+                            <sort_order>40</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </frontend_hosts>
+                        <!-- <frontend_director translate="label" module="turpentine">
+                            <label>Frontend Director</label>
+                            <frontend_type>text</frontend_type>
+                            <validate>validate-greater-than-zero</validate>
+                            <sort_order>50</sort_order>
+                            <comment>Which varnish director to use to select the correct frontend</comment>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </frontend_director> -->
+                        <frontend_timeout translate="label" module="turpentine">
+                            <label>Frontend Timeout</label>
+                            <frontend_type>text</frontend_type>
+                            <validate>validate-greater-than-zero</validate>
+                            <sort_order>60</sort_order>
+                            <comment>Timeout in seconds for Varnish to get a response from Magento's frontend</comment>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </frontend_timeout>
                         <crawlers translate="label" module="turpentine">
                             <label>Crawler IP Addresses</label>
                             <frontend_type>text</frontend_type>
-                            <sort_order>50</sort_order>
+                            <sort_order>70</sort_order>
                             <comment>Comma-separated list of IPs to serve cached pages to on initial visit</comment>
                             <show_in_default>1</show_in_default>
                             <show_in_website>0</show_in_website>
@@ -247,7 +266,7 @@
                         <crawler_user_agents translate="label" module="turpentine">
                             <label>Crawler User Agents</label>
                             <frontend_type>text</frontend_type>
-                            <sort_order>60</sort_order>
+                            <sort_order>80</sort_order>
                             <comment>Comma-separated list of User-Agents (regexes) to serve cached pages to on initial visit</comment>
                             <show_in_default>1</show_in_default>
                             <show_in_website>0</show_in_website>

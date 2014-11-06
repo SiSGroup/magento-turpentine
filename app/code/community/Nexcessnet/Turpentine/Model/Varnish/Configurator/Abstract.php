@@ -262,6 +262,15 @@ abstract class Nexcessnet_Turpentine_Model_Varnish_Configurator_Abstract {
     }
 
     /**
+     * Get the list of Magento frontends from Magento config
+     *
+     * @return array
+     */
+    protected function _getFrontendList() {
+        return Mage::helper( 'turpentine/varnish' )->getFrontendList();
+    }
+
+    /**
      * Get the default backend configuration string
      *
      * @return string
@@ -272,10 +281,37 @@ abstract class Nexcessnet_Turpentine_Model_Varnish_Configurator_Abstract {
             'first_byte_timeout'    => $timeout . 's',
             'between_bytes_timeout' => $timeout . 's',
         );
-        return $this->_vcl_backend( 'default',
-            Mage::getStoreConfig( 'turpentine_vcl/backend/backend_host' ),
-            Mage::getStoreConfig( 'turpentine_vcl/backend/backend_port' ),
-            $default_options );
+        $frontends = $this->_getFrontendList();
+        if (count($frontends) === 1) {
+            list($host, $port) = array_merge(explode(":", $frontends[0], 2), array(80));
+            return $this->_vcl_backend( 'default', $host, $port, $default_options );
+        }
+        if (count($frontends) === 0) {
+            trigger_error( "No frontends -- should not happen" );
+        }
+        $default_options['probe'] = array(
+            'url' => '"/"',
+        );
+        $ret = '';
+        $names = array();
+        $first_frontend = true;
+        foreach ($frontends as $frontend) {
+            list($host, $port) = array_merge(explode(":", $frontend, 2), array(80));
+            if ($first_frontend) {
+                $name = 'default';
+                $first_frontend = false;
+            } else {
+                $name = preg_replace('/[^a-z0-9]+/','_',"default $host $port");
+            }
+            $ret .= $this->_vcl_backend( $name, $host, $port, $default_options );
+            array_push($names, $name);
+        }
+        $ret .= "import directors;\nsub vcl_init {\n\tnew frontend_hash = directors.hash();\n";
+        foreach ($names as $name) {
+            $ret .= "\tfrontend_hash.add_backend($name, 1.0);\n";
+        }
+        $ret .= "}\n";
+        return $ret;
     }
 
     /**
@@ -290,8 +326,8 @@ abstract class Nexcessnet_Turpentine_Model_Varnish_Configurator_Abstract {
             'between_bytes_timeout' => $timeout . 's',
         );
         return $this->_vcl_backend( 'admin',
-            Mage::getStoreConfig( 'turpentine_vcl/backend/backend_host' ),
-            Mage::getStoreConfig( 'turpentine_vcl/backend/backend_port' ),
+            Mage::getStoreConfig( 'turpentine_vcl/backend/admin_backend_host' ),
+            Mage::getStoreConfig( 'turpentine_vcl/backend/admin_backend_port' ),
             $admin_options );
     }
 
@@ -515,7 +551,16 @@ EOS;
         );
         $str = $this->_formatTemplate( $tpl, $vars );
         foreach( $options as $key => $value ) {
-            $str .= sprintf( '   .%s = %s;', $key, $value ) . PHP_EOL;
+            if (!is_array($value)) {
+                $str .= sprintf( '   .%s = %s;', $key, $value ) . PHP_EOL;
+            } else {
+                $str .= sprintf( '   .%s = {', $key ) . PHP_EOL;
+                $suboptions = $value;
+                foreach( $suboptions as $key => $value ) {
+                    $str .= sprintf( '       .%s = %s;', $key, $value ) . PHP_EOL;
+                }
+                $str .= '   }' . PHP_EOL;
+            }
         }
         $str .= '}' . PHP_EOL;
         return $str;
@@ -610,6 +655,18 @@ EOS;
     }
 
     /**
+     * Get the Host normalization sub routine
+     *
+     * @return string
+     */
+    protected function _vcl_sub_set_backend_hint() {
+        $tpl = <<<EOS
+set req.backend_hint = frontend_hash.backend(regsub(req.http.Cookie, ".*\bfrontend=([^;]*).*", "\\1") + regsub(req.http.X-Forwarded-For," *([^, ]*).*", "\\1"));
+EOS;
+        return $tpl;
+    }
+
+    /**
      * Build the list of template variables to apply to the VCL template
      *
      * @return array
@@ -658,6 +715,9 @@ EOS;
         }
         if( Mage::getStoreConfig( 'turpentine_vcl/normalization/host' ) ) {
             $vars['normalize_host'] = $this->_vcl_sub_normalize_host();
+        }
+        if( count($this->_getFrontendList()) != 1 ) {
+            $vars['set_backend_hint'] = $this->_vcl_sub_set_backend_hint();
         }
 
         $customIncludeFile = $this->_getCustomIncludeFilename();

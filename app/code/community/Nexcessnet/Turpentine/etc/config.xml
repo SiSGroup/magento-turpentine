@@ -44,10 +44,11 @@
         </turpentine_varnish>
         <turpentine_vcl>
             <backend>
-                <backend_host>127.0.0.1</backend_host>
-                <backend_port>8080</backend_port>
-                <frontend_timeout>300</frontend_timeout>
+                <admin_backend_host>127.0.0.1</admin_backend_host>
+                <admin_backend_port>8080</admin_backend_port>
                 <admin_timeout>21600</admin_timeout>
+                <frontend_hosts></frontend_hosts>
+                <frontend_timeout>300</frontend_timeout>
                 <crawlers>127.0.0.1</crawlers>
                 <crawler_user_agents><![CDATA[ApacheBench/.*,.*Googlebot.*,JoeDog/.*Siege.*,magespeedtest\.com,Nexcessnet_Turpentine/.*]]></crawler_user_agents>
             </backend>

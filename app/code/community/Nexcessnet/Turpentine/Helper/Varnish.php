@@ -146,6 +146,23 @@ class Nexcessnet_Turpentine_Helper_Varnish extends Mage_Core_Helper_Abstract {
     }
 
     /**
+     * Get the configured default object TTL
+     *
+     * @return string
+     */
+    public function getFrontendList() {
+        $frontend_hosts = Mage::getStoreConfig( 'turpentine_vcl/backend/frontend_hosts' );
+        $frontends = Mage::helper( 'turpentine/data' )->cleanExplode( PHP_EOL, $frontend_hosts );
+        if (count($frontends) === 0) {
+            return array(
+                Mage::getStoreConfig( 'turpentine_vcl/backend/admin_backend_host' ) . ':' .
+                Mage::getStoreConfig( 'turpentine_vcl/backend/admin_backend_port' )
+            );
+        }
+        return $frontends;
+    }
+
+    /**
      * Check if the product list toolbar fix is enabled and we're not in the
      * admin section
      *

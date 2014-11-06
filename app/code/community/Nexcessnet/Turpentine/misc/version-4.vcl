@@ -169,11 +169,12 @@ sub vcl_recv {
                 call generate_session;
             }
         }
+        {{set_backend_hint}}
         if ({{force_cache_static}} &&
                 req.url ~ ".*\.(?:{{static_extensions}})(?=\?|&|$)") {
             # don't need cookies for static assets
-            unset req.http.Cookie;
-            unset req.http.X-Varnish-Faked-Session;
+            # unset req.http.Cookie;
+            # unset req.http.X-Varnish-Faked-Session;
             return (hash);
         }
         # this doesn't need a enable_url_excludes because we can be reasonably
@@ -223,6 +224,11 @@ sub vcl_hash {
         hash_data(server.ip);
     }
     hash_data(req.http.Ssl-Offloaded);
+    if (req.http.X-Forwarded-Proto) {
+        hash_data(req.http.X-Forwarded-Proto);
+    } else {
+        hash_data("http");
+    }
     if (req.http.X-Normalized-User-Agent) {
         hash_data(req.http.X-Normalized-User-Agent);
     }
@@ -267,6 +273,7 @@ sub vcl_backend_response {
 
     # if it's part of magento...
     if (bereq.url ~ "{{url_base_regex}}") {
+        set beresp.http.X-Magento-IP = beresp.backend.ip;
         # we handle the Vary stuff ourselves for now, we'll want to actually
         # use this eventually for compatibility with downstream proxies
         # TODO: only remove the User-Agent field from this if it exists
@@ -364,12 +371,14 @@ sub vcl_deliver {
         set resp.http.X-Varnish-Esi-Access = req.http.X-Varnish-Esi-Access;
         set resp.http.X-Varnish-Currency = req.http.X-Varnish-Currency;
         set resp.http.X-Varnish-Store = req.http.X-Varnish-Store;
+        set resp.http.X-Varnish-IP = server.ip;
     } else {
         # remove Varnish fingerprints
         unset resp.http.X-Varnish;
         unset resp.http.Via;
         unset resp.http.X-Powered-By;
         unset resp.http.Server;
+        unset resp.http.X-Magento-IP;
         unset resp.http.X-Turpentine-Cache;
         unset resp.http.X-Turpentine-Esi;
         unset resp.http.X-Turpentine-Flush-Events;
@@ -377,6 +386,7 @@ sub vcl_deliver {
         unset resp.http.X-Varnish-Session;
         unset resp.http.X-Varnish-Host;
         unset resp.http.X-Varnish-URL;
+        unset resp.http.X-Varnish-IP;
         # this header indicates the session that originally generated a cached
         # page. it *must* not be sent to a client in production with lax
         # session validation or that session can be hijacked
