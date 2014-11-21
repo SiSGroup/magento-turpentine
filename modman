@@ -1,6 +1,7 @@
 ## Nexcess.net Turpentine (Varnish) Extension
 
 app/etc/modules/Nexcessnet_Turpentine.xml       app/etc/modules/Nexcessnet_Turpentine.xml
+app/etc/n98-magerun.yaml        app/etc/n98-magerun.yaml
 app/code/community/Nexcessnet/Turpentine/       app/code/community/Nexcessnet/Turpentine/
 app/code/local/Mage/Core/Model/Session.php      app/code/local/Mage/Core/Model/Session.php
 app/design/adminhtml/default/default/layout/turpentine.xml  app/design/adminhtml/default/default/layout/turpentine.xml

@@ -1,0 +1,6 @@
+autoloaders:
+  SiS\Magento\Command\Varnish: %root%/app/code/community/Nexcessnet/Turpentine/magerun
+
+commands:
+  customCommands:
+    - SiS\Magento\Command\Varnish\ApplyCommand
