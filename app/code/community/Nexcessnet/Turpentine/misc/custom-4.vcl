@@ -339,6 +339,11 @@ sub vcl_hit {
 # }
 
 sub vcl_backend_response {
+    if (beresp.http.X-Varnish-NoCache) {
+        set beresp.http.X-Turpentine-Cache = "0";
+        set beresp.uncacheable = true;
+        unset beresp.http.X-Varnish-NoCache;
+    }
     # set the grace period
     set beresp.grace = {{grace_period}}s;
 
