@@ -207,6 +207,10 @@ sub vcl_recv {
             return (pipe);
         } else {
             {{set_backend_hint}}
+            if (!std.healthy(req.backend_hint)) {
+                std.log("SICK_BACKEND: " + req.backend_hint + ", using default instead");
+                set req.backend_hint = default;
+            }
         }
         if (req.http.Cookie ~ "\bcurrency=") {
             set req.http.X-Varnish-Currency = regsub(
