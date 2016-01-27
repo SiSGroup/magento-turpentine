@@ -101,6 +101,14 @@ sub generate_session_expires {
 ## Varnish Subroutines
 
 sub vcl_recv {
+    if (req.esi_level > 0) {
+        set req.http.X-ESI-Level = req.esi_level;
+        if (req.http.referrer ~ "^https://") {
+            set req.http.X-Forwarded-Proto = "https";
+        }
+    } else {
+        unset req.http.X-ESI-Level;
+    }
     # this always needs to be done so it's up at the top
     if (req.restarts == 0) {
         if (req.http.X-Forwarded-For) {
