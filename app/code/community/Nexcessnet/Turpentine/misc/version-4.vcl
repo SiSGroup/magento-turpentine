@@ -171,6 +171,10 @@ sub vcl_recv {
             }
         }
         {{set_backend_hint}}
+        if (!std.healthy(req.backend_hint)) {
+            std.log("SICK_BACKEND: " + req.backend_hint + ", using default instead");
+            set req.backend_hint = default;
+        }
         if ({{force_cache_static}} &&
                 req.url ~ ".*\.(?:{{static_extensions}})(?=\?|&|$)") {
             # don't need cookies for static assets
