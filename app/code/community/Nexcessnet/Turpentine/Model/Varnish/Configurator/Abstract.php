@@ -598,7 +598,7 @@ EOS;
          * @link http://magebase.com/magento-tutorials/magento-design-exceptions-explained/
          */
         $tpl = <<<EOS
-if (req.http.User-Agent ~ "iP(?:hone|ad|od)|BlackBerry|Palm|Googlebot-Mobile|Mobile|mobile|mobi|Windows Mobile|Safari Mobile|Android|Opera (?:Mini|Mobi)") {
+if (req.http.User-Agent ~ "iPhone|iPod|BlackBerry|Palm|Googlebot-Mobile|Windows Mobile|Safari Mobile|Opera Mini|BB10|Nexus [456]|LGMS323|NokiaN9|Lumia|SAMSUNG SM-N900T|SAMSUNG GT-N7100|SAMSUNG GT-I9300|SAMSUNG GT-I9505|iemobile|(Android.+Mobile)|android.+mobile") {
         set req.http.X-Normalized-User-Agent = "mobile";
     } else if (req.http.User-Agent ~ "MSIE") {
         set req.http.X-Normalized-User-Agent = "msie";
