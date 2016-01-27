@@ -28,6 +28,7 @@ C{
 ## Imports
 
 import std;
+import geoip;
 
 ## Backends
 
@@ -118,6 +119,7 @@ sub vcl_recv {
             set req.http.X-Forwarded-For = client.ip;
         }
     }
+    set req.http.X-Country-Code = geoip.country_code(regsub(req.http.X-Forwarded-For, ",.*", ""));
 
     # We only deal with GET and HEAD by default
     # we test this here instead of inside the url base regex section
@@ -253,6 +255,9 @@ sub vcl_hash {
         # make sure data is for the right store and currency based on the *store*
         # and *currency* cookies
         hash_data("s=" + req.http.X-Varnish-Store + "&c=" + req.http.X-Varnish-Currency);
+    }
+    if (req.http.X-Country-Code) {
+        hash_data(req.http.X-Country-Code);
     }
 
     if (req.http.X-Varnish-Esi-Access == "private" &&
