@@ -1,7 +1,8 @@
 <?php
 
-namespace SiS\Magento\Command\Varnish;
+namespace Nexcessnet\Turpentine\Command\Varnish;
 
+use N98\Magento\Command\AbstractMagentoCommand;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -32,13 +33,14 @@ EOT
     {
         $this->detectMagento($output, true);
         if ($this->initMagento()) {
-        Mage::dispatchEvent( 'turpentine_varnish_apply_config' );
-        $result = Mage::getModel( 'turpentine/varnish_admin' )->applyConfig();
-        foreach( $result as $name => $value ) {
-            if( $value === true ) {
-                $output->writeln( sprintf( '<info>VCL successfully applied to %s</info>', $name ) );
-            } else {
-                $output->writeln( sprintf( '<error>Failed to apply the VCL to %s: %s</error>', $name, $value ) );
+            \Mage::dispatchEvent( 'turpentine_varnish_apply_config' );
+            $result = \Mage::getModel( 'turpentine/varnish_admin' )->applyConfig();
+            foreach( $result as $name => $value ) {
+                if( $value === true ) {
+                    $output->writeln( sprintf( '<info>VCL successfully applied to %s</info>', $name ) );
+                } else {
+                    $output->writeln( sprintf( '<error>Failed to apply the VCL to %s: %s</error>', $name, $value ) );
+                }
             }
         }
     }

@@ -1,0 +1,6 @@
+autoloaders_psr4:
+  Nexcessnet\Turpentine\Command\Varnish: %module%/code
+
+commands:
+  customCommands:
+    - Nexcessnet\Turpentine\Command\Varnish\ApplyCommand
