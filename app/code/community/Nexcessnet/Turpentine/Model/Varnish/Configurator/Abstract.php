@@ -588,17 +588,46 @@ EOS;
     }
 
     /**
+     * Get the Mobile User-Agent Regex
+     *
+     * @return string
+     */
+    protected function _getMobileUserAgentRegexp($type = 'layout') {
+        $serialized = Mage::getStoreConfig("design/theme/{$type}_ua_regexp");
+
+        if ($serialized) {
+
+            $rules = unserialize($serialized);
+
+            if (!empty($rules)) {
+                foreach ($rules as $rule) {
+                    if ($rule['value'] == 'mobile')
+                        return $rule['regexp'];
+                }
+            }
+
+        }
+
+        if ($type != 'default')
+            return $this->_getUserAgentMobileRegex('default');
+
+        /**
+         * Mobile regex originally from
+         * @link http://magebase.com/magento-tutorials/magento-design-exceptions-explained/
+         *
+         * Updated to include Lumia and SAMSUNG.
+         */
+        return 'iPhone|iPod|BlackBerry|Palm|Googlebot-Mobile|Windows Mobile|Safari Mobile|Opera Mini|BB10|Nexus [456]|LGMS323|NokiaN9|Lumia|SAMSUNG SM-N900T|SAMSUNG GT-N7100|SAMSUNG GT-I9300|SAMSUNG GT-I9505|iemobile|(Android.+Mobile)|android.+mobile';
+    }
+
+    /**
      * Get the User-Agent normalization sub routine
      *
      * @return string
      */
     protected function _vcl_sub_normalize_user_agent() {
-        /**
-         * Mobile regex from
-         * @link http://magebase.com/magento-tutorials/magento-design-exceptions-explained/
-         */
         $tpl = <<<EOS
-if (req.http.User-Agent ~ "iPhone|iPod|BlackBerry|Palm|Googlebot-Mobile|Windows Mobile|Safari Mobile|Opera Mini|BB10|Nexus [456]|LGMS323|NokiaN9|Lumia|SAMSUNG SM-N900T|SAMSUNG GT-N7100|SAMSUNG GT-I9300|SAMSUNG GT-I9505|iemobile|(Android.+Mobile)|android.+mobile") {
+if (req.http.User-Agent ~ "{{mobile_ua_regexp}}") {
         set req.http.X-Normalized-User-Agent = "mobile";
     } else if (req.http.User-Agent ~ "MSIE") {
         set req.http.X-Normalized-User-Agent = "msie";
@@ -615,7 +644,8 @@ if (req.http.User-Agent ~ "iPhone|iPod|BlackBerry|Palm|Googlebot-Mobile|Windows 
     }
 
 EOS;
-        return $tpl;
+        return $this->_formatTemplate( $tpl, array(
+            'mobile_ua_regexp' => preg_quote($this->_getMobileUserAgentRegexp()) ));
     }
 
     /**
