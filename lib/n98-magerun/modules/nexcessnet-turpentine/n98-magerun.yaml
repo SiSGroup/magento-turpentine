@@ -4,3 +4,4 @@ autoloaders_psr4:
 commands:
   customCommands:
     - Nexcessnet\Turpentine\Command\Varnish\ApplyCommand
+    - Nexcessnet\Turpentine\Command\Varnish\SaveCommand
