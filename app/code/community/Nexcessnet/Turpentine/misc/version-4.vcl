@@ -372,7 +372,7 @@ sub vcl_backend_response {
 }
 
 sub vcl_deliver {
-    if (req.http.X-Varnish-Faked-Session) {
+    if (req.http.X-Varnish-Faked-Session && resp.status != 301 && resp.status != 302) {
         # need to set the set-cookie header since we just made it out of thin air
         call generate_session_expires;
         set resp.http.Set-Cookie = req.http.X-Varnish-Faked-Session +
