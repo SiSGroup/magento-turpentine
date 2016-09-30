@@ -21,9 +21,9 @@ vcl 4.0;
 
 ## Custom C Code
 
+# @source app/code/community/Nexcessnet/Turpentine/misc/uuid.c
 C{
-    // @source app/code/community/Nexcessnet/Turpentine/misc/uuid.c
-    {{custom_c_code}}
+{{custom_c_code}}
 }C
 
 ## Imports
@@ -222,6 +222,12 @@ sub vcl_recv {
                 req.http.Cookie, "^.*?_cust_tr=([^;]*);*.*$", "\1");
         }
         # looks like an ESI request, add some extra vars for further processing
+        if (client.ip ~ debug_acl || std.ip(regsub(req.http.X-forwarded-for, " *,.*", ""), "0.0.0.0") ~ debug_acl) {
+            set req.http.X-Varnish-Debug = regsub(req.http.X-forwarded-for, " *,.*", "");
+            set req.hash_always_miss = true;
+        } else {
+            unset req.http.X-Varnish-Debug;
+        }
         if (req.url ~ "/turpentine/esi/get(?:Block|FormKey)/") {
             set req.http.X-Varnish-Esi-Method = regsub(
                 req.url, ".*/{{esi_method_param}}/(\w+)/.*", "\1");
@@ -231,7 +237,7 @@ sub vcl_recv {
             # throw a forbidden error if debugging is off and a esi block is
             # requested by the user (does not apply to ajax blocks)
             if (req.http.X-Varnish-Esi-Method == "esi" && req.esi_level == 0 &&
-                    !({{debug_headers}} || client.ip ~ debug_acl)) {
+                    !({{debug_headers}} || req.http.X-Varnish-Debug)) {
                 return (synth(403, "External ESI requests are not allowed"));
             }
         }
@@ -490,6 +496,9 @@ sub vcl_backend_response {
             }
         }
         # we've done what we need to, send to the client
+        if (bereq.http.X-Varnish-Debug) {
+            set beresp.uncacheable = true;
+        }
         return (deliver);
     }
     # else it's not part of Magento so use the default Varnish handling
@@ -525,7 +534,7 @@ sub vcl_deliver {
     if (req.http.X-Varnish-Esi-Method == "ajax" && req.http.X-Varnish-Esi-Access == "private") {
         set resp.http.Cache-Control = "no-cache";
     }
-    if ({{debug_headers}} || client.ip ~ debug_acl) {
+    if ({{debug_headers}} || req.http.X-Varnish-Debug) {
         # debugging is on, give some extra info
         set resp.http.X-Varnish-Hits = obj.hits;
         set resp.http.X-Varnish-Esi-Method = req.http.X-Varnish-Esi-Method;
