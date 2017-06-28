@@ -216,6 +216,11 @@ sub vcl_recv {
             set req.http.X-Varnish-Store = regsub(
                 req.http.Cookie, ".*\bstore=([^;]*).*", "\1");
         }
+        ##TODO: This cookie is temporary and assumes a SINGLE PRODUCT TAX CLASS per site
+        if (req.http.Cookie ~ "\b_cust_tr=") {
+            set req.http.X-Varnish-Taxrate = regsub(
+                req.http.Cookie, "^.*?_cust_tr=([^;]*);*.*$", "\1");
+        }
         # looks like an ESI request, add some extra vars for further processing
         if (req.url ~ "/turpentine/esi/get(?:Block|FormKey)/") {
             set req.http.X-Varnish-Esi-Method = regsub(
@@ -346,11 +351,11 @@ sub vcl_hash {
         hash_data(req.http.Accept-Encoding);
         std.log("hash_data - req.http.Accept-Encoding: " + req.http.Accept-Encoding);
     }
-    if (req.http.X-Varnish-Store || req.http.X-Varnish-Currency) {
-        # make sure data is for the right store and currency based on the *store*
-        # and *currency* cookies
-        hash_data("s=" + req.http.X-Varnish-Store + "&c=" + req.http.X-Varnish-Currency);
-        std.log("hash_data - Store and Currency: " + "s=" + req.http.X-Varnish-Store + "&c=" + req.http.X-Varnish-Currency);
+    if (req.http.X-Varnish-Store || req.http.X-Varnish-Currency || req.http.X-Varnish-Taxrate) {
+        # make sure data is for the right store and currency based on the *store*, *currency*,
+        # and *_cust_tr* cookies
+        hash_data("s=" + req.http.X-Varnish-Store + "&c=" + req.http.X-Varnish-Currency + "&tr=" + req.http.X-Varnish-Taxrate);
+        std.log("hash_data - Store and Currency: " + "s=" + req.http.X-Varnish-Store + "&c=" + req.http.X-Varnish-Currency + "&tr=" + req.http.X-Varnish-Taxrate);
     }
     if (req.http.X-Country-Code) {
         hash_data(req.http.X-Country-Code);
@@ -513,6 +518,7 @@ sub vcl_deliver {
         set resp.http.X-Varnish-Esi-Access = req.http.X-Varnish-Esi-Access;
         set resp.http.X-Varnish-Currency = req.http.X-Varnish-Currency;
         set resp.http.X-Varnish-Store = req.http.X-Varnish-Store;
+        set resp.http.X-Varnish-Taxrate = req.http.X-Varnish-Taxrate;
     } else {
         # remove Varnish fingerprints
         unset resp.http.X-Varnish;
