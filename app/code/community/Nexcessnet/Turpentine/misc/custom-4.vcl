@@ -451,8 +451,10 @@ sub vcl_backend_response {
                 if ({{force_cache_static}} &&
                         bereq.url ~ ".*\.(?:{{static_extensions}})(?=\?|&|$)") {
                     # it's a static asset
-                    set beresp.ttl = {{static_ttl}}s;
-                    set beresp.http.Cache-Control = "max-age={{static_ttl}}";
+                    if (beresp.status == 200) {
+                        set beresp.ttl = {{static_ttl}}s;
+                        set beresp.http.Cache-Control = "max-age={{static_ttl}}";
+                    }
                 } elseif (bereq.http.X-Varnish-Esi-Method) {
                     # it's a ESI request
                     if (bereq.http.X-Varnish-Esi-Access == "private" &&
