@@ -48,6 +48,24 @@ import geoip;
 
 {{debug_acl}}
 
+acl cloudflare_acl {
+    "103.21.244.0/22";
+    "103.22.200.0/22";
+    "103.31.4.0/22";
+    "104.16.0.0/12";
+    "108.162.192.0/18";
+    "131.0.72.0/22";
+    "141.101.64.0/18";
+    "162.158.0.0/15";
+    "172.64.0.0/13";
+    "173.245.48.0/20";
+    "188.114.96.0/20";
+    "190.93.240.0/20";
+    "197.234.240.0/22";
+    "198.41.128.0/17";
+    "199.27.128.0/21";
+}
+
 ## Custom Subroutines
 
 {{generate_session_start}}
@@ -125,14 +143,37 @@ sub vcl_recv {
 
     # this always needs to be done so it's up at the top
     if (req.restarts == 0) {
-        if (req.http.X-Forwarded-For) {
-            set req.http.X-Forwarded-For =
-                req.http.X-Forwarded-For + ", " + client.ip;
+        unset req.http.X-Country-Code;
+        if (req.http.X-HAProxy-Client-IP) {
+            unset req.http.X-Forwarded-For;
+            if (std.ip(req.http.X-HAProxy-Client-IP,"0.0.0.0") ~ cloudflare_acl) {
+                std.log("X-HAProxy-Client-IP matches CloudFlare");
+                if (req.http.CF-Connecting-IP) {
+                    set req.http.X-Forwarded-For = req.http.CF-Connecting-IP + ", " + client.ip;
+                } else {
+                    std.log("CloudFlare missing CF-Connecting-IP");
+                }
+                if (req.http.CF-IPCountry) {
+                    set req.http.X-Country-Code = req.http.CF-IPCountry;
+                } else {
+                    std.log("CloudFlare missing CF-IPCountry");
+                }
+            }
+            if (!req.http.X-Forwarded-For) {
+                set req.http.X-Forwarded-For = req.http.X-HAProxy-Client-IP + ", " + client.ip;
+            }
         } else {
-            set req.http.X-Forwarded-For = client.ip;
+            if (req.http.X-Forwarded-For) {
+                set req.http.X-Forwarded-For =
+                    req.http.X-Forwarded-For + ", " + client.ip;
+            } else {
+                set req.http.X-Forwarded-For = client.ip;
+            }
+        }
+        if (!req.http.X-Country-Code) {
+            set req.http.X-Country-Code = geoip.country_code(regsub(req.http.X-Forwarded-For, ",.*", ""));
         }
     }
-    set req.http.X-Country-Code = geoip.country_code(regsub(req.http.X-Forwarded-For, ",.*", ""));
 
     # We only deal with GET and HEAD by default
     # we test this here instead of inside the url base regex section
