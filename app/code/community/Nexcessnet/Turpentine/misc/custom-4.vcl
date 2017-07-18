@@ -342,6 +342,14 @@ sub vcl_hash {
     std.log("hash_data - req.http.Ssl-Offloaded: " + req.http.Ssl-Offloaded);
     hash_data(req.http.Ssl-Offloaded);
 
+    if (req.http.X-Forwarded-Proto) {
+        hash_data(req.http.X-Forwarded-Proto);
+        std.log("hash_data - req.http.X-Forwarded-Proto: " + req.http.X-Forwarded-Proto);
+    } else {
+        hash_data("http");
+        std.log("hash_data - missing req.http.X-Forwarded-Proto: http");
+    }
+
     if (req.http.X-Normalized-User-Agent) {
         hash_data(req.http.X-Normalized-User-Agent);
         std.log("hash_data - req.http.X-Normalized-User-Agent: " + req.http.X-Normalized-User-Agent);
