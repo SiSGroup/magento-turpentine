@@ -410,6 +410,10 @@ sub vcl_backend_response {
     set beresp.http.X-Varnish-Host = bereq.http.host;
     set beresp.http.X-Varnish-URL = bereq.url;
 
+    # Remember which backend the response came from and when
+    set beresp.http.X-Magento-IP = beresp.backend.ip;
+    set beresp.http.X-Magento-Date = beresp.http.date;
+
     # if it's part of magento...
     if (bereq.url ~ "{{url_base_regex}}") {
         # we handle the Vary stuff ourselves for now, we'll want to actually
@@ -529,12 +533,15 @@ sub vcl_deliver {
         set resp.http.X-Varnish-Currency = req.http.X-Varnish-Currency;
         set resp.http.X-Varnish-Store = req.http.X-Varnish-Store;
         set resp.http.X-Varnish-Taxrate = req.http.X-Varnish-Taxrate;
+        set resp.http.X-Varnish-IP = server.ip;
     } else {
         # remove Varnish fingerprints
         unset resp.http.X-Varnish;
         unset resp.http.Via;
         unset resp.http.X-Powered-By;
         unset resp.http.Server;
+        unset resp.http.X-Magento-IP;
+        unset resp.http.X-Magento-Date;
         unset resp.http.X-Turpentine-Cache;
         unset resp.http.X-Turpentine-Esi;
         unset resp.http.X-Turpentine-Flush-Events;
