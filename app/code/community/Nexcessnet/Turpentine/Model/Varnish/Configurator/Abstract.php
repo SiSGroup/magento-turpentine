@@ -827,7 +827,7 @@ if (req.http.User-Agent ~ "{{mobile_ua_regexp}}") {
 
 EOS;
         return $this->_formatTemplate( $tpl, array(
-            'mobile_ua_regexp' => preg_quote($this->_getMobileUserAgentRegexp()) ));
+            'mobile_ua_regexp' => preg_replace('/(?<!\\\\)((?:\\\\\\\\)*)\"/', '$1\x22', $this->_getMobileUserAgentRegexp()) ));
     }
 
     /**
