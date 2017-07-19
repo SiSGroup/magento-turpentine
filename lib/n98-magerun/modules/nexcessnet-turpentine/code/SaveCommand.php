@@ -38,7 +38,7 @@ EOT
                 $output->writeln( sprintf( '<error>Failed to load configurator</error>' ) );
             } else {
                 \Mage::dispatchEvent( 'turpentine_varnish_save_config', array( 'cfgr' => $cfgr ) );
-                $result = $cfgr->save( $cfgr->generate( Mage::helper('turpentine')->shouldStripVclWhitespace('save') ) );
+                $result = $cfgr->save( $cfgr->generate( \Mage::helper('turpentine')->shouldStripVclWhitespace('save') ) );
                 if( $result[0] ) {
                     $output->writeln( sprintf( '<info>The VCL file has been saved.</info>' ) );
                 } else {
