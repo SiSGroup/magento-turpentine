@@ -430,8 +430,10 @@ sub vcl_backend_response {
         # use this eventually for compatibility with downstream proxies
         # TODO: only remove the User-Agent field from this if it exists
         unset beresp.http.Vary;
-        # we pretty much always want to do this
-        set beresp.do_gzip = true;
+        if (beresp.http.Content-Type !~ "^(?:audio|image(?!/svg)|video)/") {
+            # If it's not a media file or it's image/svg then force gzip
+            set beresp.do_gzip = true;
+        }
 
         if (beresp.status != 200 && beresp.status != 404) {
             # pass anything that isn't a 200 or 404
