@@ -17,7 +17,9 @@ class ApplyCommand extends AbstractMagentoCommand
             ->setName('varnish:apply')
             ->setDescription('Apply varnish config to varnish servers')
             ->setHelp(<<<EOT
-... TBD ...
+Updates all of the varnish servers with the current varnish VCL.
+
+If you would like to only update one server provide it as an argument.
 EOT
                 )
             ->addArgument('server', InputArgument::OPTIONAL, 'A specific server')

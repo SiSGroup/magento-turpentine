@@ -17,7 +17,7 @@ class SaveCommand extends AbstractMagentoCommand
             ->setName('varnish:save')
             ->setDescription('Save the configuration to a VCL file')
             ->setHelp(<<<EOT
-... TBD ...
+Saves the current varnish configuration VCL to a file
 EOT
                 )
             ->addArgument('file', InputArgument::OPTIONAL, 'Where to save the VCL')
