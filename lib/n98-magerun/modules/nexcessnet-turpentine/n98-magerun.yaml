@@ -5,3 +5,6 @@ commands:
   customCommands:
     - Nexcessnet\Turpentine\Command\Varnish\ApplyCommand
     - Nexcessnet\Turpentine\Command\Varnish\SaveCommand
+    - Nexcessnet\Turpentine\Command\Varnish\BackendAddCommand
+    - Nexcessnet\Turpentine\Command\Varnish\BackendRemoveCommand
+    - Nexcessnet\Turpentine\Command\Varnish\BackendListCommand
