@@ -127,6 +127,12 @@ sub vcl_init {
 }
 
 sub vcl_recv {
+    if (req.url ~ "{{url_base_regex}}{{admin_frontname}}") {
+        set req.backend_hint = {{admin_backend_hint}};
+    } else {
+        {{set_backend_hint}}
+    }
+
 	{{maintenance_allowed_ips}}
 
     {{https_proto_fix}}
@@ -203,14 +209,7 @@ sub vcl_recv {
         set req.http.X-Turpentine-Secret-Handshake = "{{secret_handshake}}";
         # use the special admin backend and pipe if it's for the admin section
         if (req.url ~ "{{url_base_regex}}{{admin_frontname}}") {
-            set req.backend_hint = {{admin_backend_hint}};
             return (pipe);
-        } else {
-            {{set_backend_hint}}
-            if (!std.healthy(req.backend_hint)) {
-                std.log("SICK_BACKEND: " + req.backend_hint + ", using default instead");
-                set req.backend_hint = web0;
-            }
         }
         if (req.http.Cookie ~ "\bcurrency=") {
             set req.http.X-Varnish-Currency = regsub(
