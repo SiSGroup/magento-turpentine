@@ -202,6 +202,15 @@
         </cache>
         <events>
             <!-- Varnish Events -->
+            <controller_front_init_before>
+                <observers>
+                    <turpentine_varnish_controller_front_init_before>
+                        <class>turpentine/observer_varnish</class>
+                        <method>defaultGeoIPCountry</method>
+                    </turpentine_varnish_controller_front_init_before>
+                </observers>
+            </controller_front_init_before>
+
             <http_response_send_before>
                 <observers>
                     <turpentine_varnish_http_response_send_before>

@@ -20,6 +20,27 @@
  */
 
 class Nexcessnet_Turpentine_Model_Observer_Varnish extends Varien_Event_Observer {
+
+    const GEOIP_PARAM = 'geoip_country';
+
+    const GEOIP_HEADER = 'X_COUNTRY_CODE';
+
+    /**
+     * Preload 'geoip_country' parameter from `X-Country-Code` header
+     *
+     * @param Varien_Object $eventObject
+     * @return null
+     */
+    public function defaultGeoIPCountry($eventObject) {
+        $request = Mage::app()->getRequest();
+        if ($request->getParam(self::GEOIP_PARAM, null) === null) {
+            $country = $request->getHeader(self::GEOIP_HEADER);
+            if ($country !== false) {
+                $request->setParam(self::GEOIP_PARAM, $country);
+            }
+        }
+    }
+
     /**
      * Check sentinel flags and set headers/cookies as needed
      *
